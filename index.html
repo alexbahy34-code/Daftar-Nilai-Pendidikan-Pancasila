@@ -286,7 +286,7 @@
         function downloadExcel() {
             if(!GLOBAL_DATA || GLOBAL_DATA.length === 0) { alert("Belum ada data."); return; }
             let headers = ["No", "Nama Siswa", "NIS", "NISN", "Tempat Tanggal Lahir", "JK", "TP1", "TP2", "TP3", "TP4", "TP5", "LM1", "LM2", "LM3", "SAS", "Nilai Akhir"];
-            let data = [ ["REKAP NILAI PEND. AGAMA DAN BUDI PEKERTI"], ["TP. 2025/2026"], [], headers ];
+            let data = [ ["REKAP NILAI PEND. PANCASILA"], ["TP. 2025/2026"], [], headers ];
             GLOBAL_DATA.forEach((row, idx) => {
                 let calc = calculateScore(row);
                 data.push([
@@ -299,7 +299,7 @@
             let ws = XLSX.utils.aoa_to_sheet(data);
             ws['!cols'] = [{wch:5}, {wch:30}, {wch:10}, {wch:15}, {wch:25}, {wch:5}];
             XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
-            XLSX.writeFile(wb, "Rekap_Nilai_Pend. Agama dan Budi Pekerti.xlsx");
+            XLSX.writeFile(wb, "Rekap_Nilai_Pend. Pancasila.xlsx");
         }
 
         document.getElementById('searchInput').addEventListener('keyup', function(e) {
@@ -319,6 +319,7 @@
     </script>
 </body>
 </html>
+
 
 
 
