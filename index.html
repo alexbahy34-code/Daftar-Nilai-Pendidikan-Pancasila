@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Aplikasi Nilai Pend. Agama dan Budi Pekerti</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root { --primary: #4361ee; --secondary: #7209b7; --bg-light: #f3f4f6; --col-no-width: 40px; --col-name-width: 250px; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-light); font-size: 14px; color: #333; }
+        .app-header { background: rgba(255, 255, 255, 0.98); padding: 12px 15px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #e5e7eb; }
+        .logo-area img { max-height: 50px; width: auto; max-width: 100%; object-fit: contain; }
+        .custom-nav .nav-link { font-weight: 500; color: #6c757d; border-radius: 50px; margin: 2px; font-size: 12px; }
+        .custom-nav .nav-link.active { background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%); color: white; }
+        .table-container { background: white; overflow: auto; max-height: 75vh; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background-color: #f8f9fa; position: sticky; top: 0; z-index: 20; font-size: 11px; padding: 10px 5px; text-align: center; border-bottom: 2px solid #ddd; white-space: nowrap; }
+        .sticky-no { position: sticky; left: 0; z-index: 10; background-color: white; width: var(--col-no-width); border-right: 1px solid #eee; }
+        .sticky-nama { position: sticky; left: var(--col-no-width); z-index: 10; background-color: white; min-width: var(--col-name-width); border-right: 2px solid #e2e8f0; text-align: left !important; padding-left: 10px !important; }
+        th.sticky-no, th.sticky-nama { z-index: 30; }
+        input[type="number"] { width: 100%; min-width: 50px; text-align: center; border: 1px solid #dee2e6; border-radius: 4px; padding: 6px 0; }
+        
+        .fab-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+        .btn-fab { border-radius: 50px; padding: 10px 15px; font-weight: 600; font-size: 12px; display: flex; gap: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        #loader { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        
+        /* LOGIN STYLE */
+        #login-overlay { position: fixed; inset: 0; background: #4361ee; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        .login-card { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
+        
+        @media (max-width: 768px) { :root { var(--col-name-width: 140px; } .sticky-nama { font-size: 12px; } }
+        @media print { .d-print-none, .app-header, .fab-container { display: none !important; } .tab-content > .tab-pane { display: none; } #tab-rapor { display: block !important; } table { border-collapse: collapse !important; } th, td { border: 1px solid black !important; } }
+    </style>
+</head>
+<body>
+    <div id="login-overlay">
+        <div class="login-card">
+            <img src="https://iili.io/fx9qBjt.png" alt="Logo" style="height: 60px; margin-bottom: 20px;">
+            <h5 class="fw-bold mb-1">Login Guru</h5>
+            <p class="text-muted small mb-4">Masukkan kode akses untuk masuk</p>
+            <div class="mb-3">
+                <input type="password" id="passwordInput" class="form-control text-center" placeholder="Kode Akses">
+            </div>
+            <button class="btn btn-primary w-100 fw-bold" onclick="attemptLogin()">MASUK</button>
+            <p id="loginError" class="text-danger small mt-3 fw-bold" style="display:none;">Password Salah!</p>
+        </div>
+    </div>
+
+    <div id="app-content" style="display:none;">
+        <div id="loader" style="display:none;">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <h6 class="fw-bold">Mengambil Data...</h6>
+        </div>
+
+        <div class="app-header d-print-none">
+            <div class="header-top d-flex flex-wrap align-items-center mb-3">
+                <div class="logo-area me-3"><img src="https://iili.io/fx9qBjt.png" alt="Logo"></div>
+                <div class="school-info flex-grow-1">
+                    <h5 class="m-0 fw-bold">SMK NEGERI 1 MALUKU TENGAH</h5>
+                    <small class="text-secondary">Aplikasi Nilai Pend. Agama dan Budi Pekerti - TP. 2025/2026</small>
+                </div>
+                <div class="controls-area mt-2 mt-md-0 d-flex gap-2">
+                    <button class="btn btn-outline-danger btn-sm" onclick="doLogout()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
+                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Cari Siswa...">
+                </div>
+            </div>
+            <ul class="nav nav-pills nav-fill custom-nav" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-datasiswa">DATA SISWA</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-formatif">FORMATIF</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sumatif">SUMATIF</button></li>
+                <li class="nav-item"><button class="nav-link bg-success-subtle text-success fw-bold" data-bs-toggle="tab" data-bs-target="#tab-rapor">RAPOR</button></li>
+            </ul>
+        </div>
+
+        <div class="container-fluid px-2 pb-5 main-content">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-datasiswa">
+                    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-3">
+                        <div class="table-container">
+                            <table class="table mb-0 table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="sticky-no">No</th><th class="sticky-nama">Nama Siswa</th>
+                                        <th>NIS</th><th>NISN</th><th>Tempat Tanggal Lahir</th><th>JK</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyDataSiswa"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tab-formatif">
+                    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-3">
+                        <div class="table-container">
+                            <table class="table mb-0 table-hover">
+                                <thead><tr><th class="sticky-no">No</th><th class="sticky-nama">Nama Siswa</th><th>TP 1</th><th>TP 2</th><th>TP 3</th><th>TP 4</th><th>TP 5</th></tr></thead>
+                                <tbody id="bodyFormatif"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tab-sumatif">
+                    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-3">
+                        <div class="table-container">
+                            <table class="table mb-0 table-hover">
+                                <thead><tr><th class="sticky-no">No</th><th class="sticky-nama">Nama Siswa</th><th>LM 1</th><th>LM 2</th><th>LM 3</th><th>SAS</th></tr></thead>
+                                <tbody id="bodySumatif"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tab-rapor">
+                    <div id="printArea" class="bg-white p-4 mt-3 rounded shadow-sm">
+                        <div class="text-center mb-4 border-bottom pb-3"><h4 class="fw-bold">Rekap Nilai Pend. Agama dan Budi Pekerti</h4></div>
+                        <table class="table table-bordered table-sm w-100" style="font-size: 12px;">
+                            <thead class="table-light text-center align-middle">
+                                <tr><th rowspan="2">No</th><th rowspan="2">Nama Siswa</th><th colspan="3">Identitas</th><th colspan="5">Formatif</th><th colspan="3">Sumatif</th><th rowspan="2">SAS</th><th rowspan="2">NA</th></tr>
+                                <tr><th>NIS</th><th>NISN</th><th>JK</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>1</th><th>2</th><th>3</th></tr>
+                            </thead>
+                            <tbody id="bodyRapor"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fab-container d-print-none">
+            <button class="btn btn-success btn-fab shadow mb-2" onclick="downloadExcel()">
+                <i class="bi bi-file-earmark-excel-fill"></i> Excel
+            </button>
+            <button class="btn btn-secondary btn-fab shadow mb-2" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> Cetak
+            </button>
+            <button class="btn btn-danger btn-fab shadow mb-2" onclick="resetData()">
+                <i class="bi bi-trash3-fill"></i> Reset
+            </button>
+            <button class="btn btn-primary btn-fab shadow" id="btnSave" onclick="saveData()" disabled>
+                <i class="bi bi-floppy-fill"></i> <span id="btnSaveText">Simpan</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // --- MASUKKAN URL GOOGLE SCRIPT ANDA DISINI ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbxKX57IQg7EIAnhsSnmW_a2LY0YTfH_M6of77myg-LxBubeXlI4Ttnvl02rbQsYceE/exec"; 
+        // ----------------------------------------------
+
+        let GLOBAL_DATA = [];
+        let isDirty = false;
+        let CURRENT_PASSWORD = "";
+
+        // SAAT APLIKASI DIBUKA
+        window.onload = function() {
+            // Cek apakah sudah pernah login sebelumnya
+            let savedPass = localStorage.getItem('guru_pass');
+            if(savedPass) {
+                document.getElementById('passwordInput').value = savedPass;
+                attemptLogin();
+            }
+        };
+
+        function attemptLogin() {
+            let pass = document.getElementById('passwordInput').value;
+            if(!pass) { alert("Masukkan Password!"); return; }
+
+            // Tampilkan loading, sembunyikan login form
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('loader').style.display = 'flex';
+
+            // Coba ambil data dengan password tersebut
+            fetch(API_URL + "?action=read&pass=" + pass)
+                .then(res => res.json())
+                .then(data => {
+                    // Jika password salah, backend akan kirim status: error
+                    if(data.status === 'error') {
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('app-content').style.display = 'none';
+                        document.getElementById('login-overlay').style.display = 'flex';
+                        document.getElementById('loginError').style.display = 'block';
+                        document.getElementById('loginError').innerText = "Password Salah!";
+                        localStorage.removeItem('guru_pass'); // Hapus sesi
+                    } else {
+                        // Jika sukses
+                        CURRENT_PASSWORD = pass;
+                        localStorage.setItem('guru_pass', pass); // Simpan sesi
+                        GLOBAL_DATA = data;
+                        renderAll();
+                        document.getElementById('loader').style.display = 'none';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('loader').innerHTML = `<h6 class="text-danger">Gagal Koneksi!</h6>`;
+                    console.error(err);
+                });
+        }
+
+        function doLogout() {
+            localStorage.removeItem('guru_pass');
+            location.reload(); // Refresh halaman
+        }
+
+        function renderAll() {
+            renderDataSiswa(); renderFormatif(); renderSumatif(); renderRapor();
+        }
+
+        function renderDataSiswa() {
+            const tbody = document.getElementById('bodyDataSiswa');
+            if(!GLOBAL_DATA || GLOBAL_DATA.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="6" class="text-center p-3">Data Kosong</td></tr>'; return;
+            }
+            tbody.innerHTML = GLOBAL_DATA.map((r, i) => 
+                `<tr><td class="sticky-no">${i+1}</td><td class="sticky-nama">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="text-start">${r[4]}</td><td>${r[3]}</td></tr>`
+            ).join('');
+        }
+
+        function renderFormatif() {
+            document.getElementById('bodyFormatif').innerHTML = GLOBAL_DATA.map((r, i) => {
+                let inputs = [5,6,7,8,9].map(c => `<td><input type="number" value="${r[c]}" data-r="${i}" data-c="${c}" oninput="updateData(this)"></td>`).join('');
+                return `<tr><td class="sticky-no">${i+1}</td><td class="sticky-nama">${r[0]}</td>${inputs}</tr>`;
+            }).join('');
+        }
+
+        function renderSumatif() {
+            document.getElementById('bodySumatif').innerHTML = GLOBAL_DATA.map((r, i) => {
+                let inputs = [10,11,12,13].map(c => `<td><input type="number" value="${r[c]}" data-r="${i}" data-c="${c}" oninput="updateData(this)"></td>`).join('');
+                return `<tr><td class="sticky-no">${i+1}</td><td class="sticky-nama">${r[0]}</td>${inputs}</tr>`;
+            }).join('');
+        }
+
+        function renderRapor() {
+            document.getElementById('bodyRapor').innerHTML = GLOBAL_DATA.map((r, i) => {
+                let calc = calculateScore(r);
+                const v = (idx) => r[idx]!==""?r[idx]:"-";
+                return `<tr class="text-center"><td>${i+1}</td><td class="text-start sticky-nama">${r[0]}</td>
+                    <td>${v(1)}</td><td>${v(2)}</td><td>${v(3)}</td>
+                    <td>${v(5)}</td><td>${v(6)}</td><td>${v(7)}</td><td>${v(8)}</td><td>${v(9)}</td>
+                    <td>${v(10)}</td><td>${v(11)}</td><td>${v(12)}</td><td>${v(13)}</td>
+                    <td class="fw-bold bg-light">${calc.na}</td></tr>`;
+            }).join('');
+        }
+
+        function calculateScore(r) {
+            let sLM=0, cLM=0; for(let x=10;x<=12;x++) { if(r[x]!==""){ sLM+=Number(r[x]); cLM++; } }
+            let sas = Number(r[13])||0;
+            let final = (cLM>0 || sas>0) ? ((cLM>0?sLM/cLM:0)*0.6 + sas*0.4) : 0;
+            return { na: final>0 ? final.toFixed(0) : '' };
+        }
+
+        function updateData(el) {
+            GLOBAL_DATA[el.dataset.r][el.dataset.c] = el.value;
+            if(!isDirty) { isDirty=true; document.getElementById('btnSave').disabled=false; document.getElementById('btnSaveText').innerText="Simpan*"; }
+        }
+
+        function saveData() {
+            document.getElementById('btnSaveText').innerText="Menyimpan..."; document.getElementById('btnSave').disabled=true;
+            // Kirim PASSWORD saat menyimpan juga
+            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save', data: GLOBAL_DATA, pass: CURRENT_PASSWORD }) })
+                .then(r => r.json()).then(d => { 
+                    if(d.status === 'error') alert(d.message);
+                    else alert(d.message); 
+                    isDirty=false; document.getElementById('btnSaveText').innerText="Simpan"; 
+                })
+                .catch(e => { alert("Tersimpan (Cek Sheet)."); isDirty=false; document.getElementById('btnSaveText').innerText="Simpan"; });
+        }
+
+        function resetData() {
+            if(confirm("Hapus semua nilai?")) {
+                fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'reset', pass: CURRENT_PASSWORD }) })
+                .then(r => r.json())
+                .then(d => { 
+                    if(d.status === 'error') { alert(d.message); return; }
+                    GLOBAL_DATA.forEach(r => { for(let k=5;k<=13;k++) r[k]="" }); renderAll(); alert("Data Reset!"); 
+                });
+            }
+        }
+
+        function downloadExcel() {
+            if(!GLOBAL_DATA || GLOBAL_DATA.length === 0) { alert("Belum ada data."); return; }
+            let headers = ["No", "Nama Siswa", "NIS", "NISN", "Tempat Tanggal Lahir", "JK", "TP1", "TP2", "TP3", "TP4", "TP5", "LM1", "LM2", "LM3", "SAS", "Nilai Akhir"];
+            let data = [ ["REKAP NILAI PEND. AGAMA DAN BUDI PEKERTI"], ["TP. 2025/2026"], [], headers ];
+            GLOBAL_DATA.forEach((row, idx) => {
+                let calc = calculateScore(row);
+                data.push([
+                    idx + 1, row[0], row[1], row[2], row[4], row[3],
+                    row[5], row[6], row[7], row[8], row[9],
+                    row[10], row[11], row[12], row[13], calc.na
+                ]);
+            });
+            let wb = XLSX.utils.book_new();
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            ws['!cols'] = [{wch:5}, {wch:30}, {wch:10}, {wch:15}, {wch:25}, {wch:5}];
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
+            XLSX.writeFile(wb, "Rekap_Nilai_Pend. Agama dan Budi Pekerti.xlsx");
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            let term = e.target.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                let name = tr.querySelector('.sticky-nama').innerText.toLowerCase();
+                tr.style.display = name.includes(term) ? '' : 'none';
+            });
+        });
+        
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(t => { t.addEventListener('shown.bs.tab', renderAll); });
+        
+        // Agar bisa tekan Enter saat login
+        document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { attemptLogin(); }
+        });
+    </script>
+</body>
+</html>
