@@ -108,7 +108,7 @@
                     <div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-3">
                         <div class="table-container">
                             <table class="table mb-0 table-hover">
-                                <thead><tr><th class="sticky-no">No</th><th class="sticky-nama">Nama Siswa</th><th>LM 1</th><th>LM 2</th><th>LM 3</th><th>SAS</th></tr></thead>
+                                <thead><tr><th class="sticky-no">No</th><th class="sticky-nama">Nama Siswa</th><th>SM 1</th><th>SM 2</th><th>SM 3</th><th>SAS</th></tr></thead>
                                 <tbody id="bodySumatif"></tbody>
                             </table>
                         </div>
@@ -249,9 +249,9 @@
         }
 
         function calculateScore(r) {
-            let sLM=0, cLM=0; for(let x=10;x<=12;x++) { if(r[x]!==""){ sLM+=Number(r[x]); cLM++; } }
+            let sSM=0, cSM=0; for(let x=10;x<=12;x++) { if(r[x]!==""){ sSM+=Number(r[x]); cSM++; } }
             let sas = Number(r[13])||0;
-            let final = (cLM>0 || sas>0) ? ((cLM>0?sLM/cLM:0)*0.6 + sas*0.4) : 0;
+            let final = (cSM>0 || sas>0) ? ((cSM>0?sSM/cSM:0)*0.6 + sas*0.4) : 0;
             return { na: final>0 ? final.toFixed(0) : '' };
         }
 
@@ -285,7 +285,7 @@
 
         function downloadExcel() {
             if(!GLOBAL_DATA || GLOBAL_DATA.length === 0) { alert("Belum ada data."); return; }
-            let headers = ["No", "Nama Siswa", "NIS", "NISN", "Tempat Tanggal Lahir", "JK", "TP1", "TP2", "TP3", "TP4", "TP5", "LM1", "LM2", "LM3", "SAS", "Nilai Akhir"];
+            let headers = ["No", "Nama Siswa", "NIS", "NISN", "Tempat Tanggal Lahir", "JK", "TP1", "TP2", "TP3", "TP4", "TP5", "SM1", "SM2", "SM3", "SAS", "Nilai Akhir"];
             let data = [ ["REKAP NILAI PEND. PANCASILA"], ["TP. 2025/2026"], [], headers ];
             GLOBAL_DATA.forEach((row, idx) => {
                 let calc = calculateScore(row);
@@ -319,6 +319,7 @@
     </script>
 </body>
 </html>
+
 
 
 
