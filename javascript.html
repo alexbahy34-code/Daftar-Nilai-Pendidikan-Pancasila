@@ -61,13 +61,13 @@
     const tbody = document.getElementById('bodySumatif');
     let html = '';
     GLOBAL_DATA.forEach((row, idx) => {
-      let inputsLM = '';
-      for(let i=10; i<=12; i++) inputsLM += createInput(idx, i, row[i]);
+      let inputsSM = '';
+      for(let i=10; i<=12; i++) inputsSM += createInput(idx, i, row[i]);
       let inputSAS = createInput(idx, 13, row[13]);
       html += `<tr>
           <td class="sticky-no">${idx+1}</td>
           <td class="sticky-nama text-truncate">${row[0]}</td>
-          ${inputsLM}
+          ${inputsSM}
           ${inputSAS}
       </tr>`;
     });
@@ -124,15 +124,15 @@
   tabRapor.addEventListener('shown.bs.tab', function () { renderRapor(); });
 
   function calculateScore(row) {
-    let sumLM = 0, countLM = 0;
+    let sumSM = 0, countSM = 0;
     for(let i=10; i<=12; i++) {
         let v = parseFloat(row[i]);
-        if(!isNaN(v) && row[i]!=="") { sumLM += v; countLM++; }
+        if(!isNaN(v) && row[i]!=="") { sumSM += v; countSM++; }
     }
     let sas = parseFloat(row[13]) || 0;
-    let avgLM = countLM > 0 ? (sumLM/countLM) : 0;
+    let avgSM = countSM > 0 ? (sumSM/countSM) : 0;
     let rapor = 0;
-    if(countLM > 0 || sas > 0) rapor = (avgLM * 0.6) + (sas * 0.4);
+    if(countSM > 0 || sas > 0) rapor = (avgSM * 0.6) + (sas * 0.4);
     return { rapor };
   }
 
@@ -170,7 +170,7 @@
 
   function downloadExcel() {
     let semester = document.getElementById('semesterSelect').value;
-    let headers = ["No", "Nama Siswa", "NIS", "NISN", "JK", "Tempat Tanggal Lahir", "TP1", "TP2", "TP3", "TP4", "TP5", "LM1", "LM2", "LM3", "SAS", "Nilai Akhir"];
+    let headers = ["No", "Nama Siswa", "NIS", "NISN", "JK", "Tempat Tanggal Lahir", "TP1", "TP2", "TP3", "TP4", "TP5", "SM1", "SM2", "SM3", "SAS", "Nilai Akhir"];
     
     let data = [
         ["REKAP NILAI PABP - SMK NEGERI 1 MALUKU TENGAH"],
@@ -215,4 +215,5 @@
         });
     });
   });
+
 </script>
